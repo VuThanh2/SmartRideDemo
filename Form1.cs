@@ -34,34 +34,22 @@ namespace SmartRideDemo
             int eta = random.Next(3, 11);         // Random ETA between 3 and 10 mins
             drivers.Add(new Driver { Name = name, Fare = fare, ETA = eta });
         }
-
         private void label1_Click(object sender, EventArgs e) {
 
         }
-
         private void lblResult_Click(object sender, EventArgs e) {
 
         }
-
         private void Form1_Load(object sender, EventArgs e) {
 
         }
-
         private void btnBook_Click(object sender, EventArgs e) {
             string customerName = txtName.Text.Trim();
             string pickup = txtPickup.Text.Trim();
             string dropoff = txtDropoff.Text.Trim();
 
-            if (string.IsNullOrWhiteSpace(customerName) ||
-                string.IsNullOrWhiteSpace(pickup) ||
-                string.IsNullOrWhiteSpace(dropoff)) {
-                lblResult.Text = "All fields are required.";
+            if (!IsValidBookingInput())
                 return;
-            }
-            if (lstAvailableDrivers.SelectedItem == null) {
-                lblResult.Text = "Please select a driver from the list.";
-                return;
-            }
             Driver driver = (Driver)lstAvailableDrivers.SelectedItem;
             if (driver == null) {
                 lblResult.Text = "No drivers available. Please try again later.";
@@ -177,7 +165,6 @@ namespace SmartRideDemo
             }
             RefreshRideList(); // Remove from list
         }
-
         private void tabBooking_Click(object sender, EventArgs e) {
 
         }
@@ -226,6 +213,71 @@ namespace SmartRideDemo
 
         private void rbSortETA_CheckedChanged(object sender, EventArgs e) {
             if (rbSortETA.Checked) LoadAvailableDrivers();
+        }
+
+        private bool IsValidName(string name) {
+            return name.All(c => char.IsLetter(c) || char.IsWhiteSpace(c));
+        }
+
+        private bool ContainsLetters(string input) {
+            return input.Any(char.IsLetter);
+        }
+
+        private bool IsValidBookingInput() {
+            string name = txtName.Text.Trim();
+            string pickup = txtPickup.Text.Trim();
+            string dropoff = txtDropoff.Text.Trim();
+
+            if (string.IsNullOrWhiteSpace(name)) {
+                lblResult.Text = "Customer name is required.";
+                lblResult.ForeColor = Color.Red;
+                txtName.Focus();
+                return false;
+            }
+
+            if (!IsValidName(name)) {
+                lblResult.Text = "Customer name must only contain letters and spaces.";
+                lblResult.ForeColor = Color.Red;
+                txtName.Focus();
+                return false;
+            }
+
+            if (string.IsNullOrWhiteSpace(pickup)) {
+                lblResult.Text = "Pickup location is required.";
+                lblResult.ForeColor = Color.Red;
+                txtPickup.Focus();
+                return false;
+            }
+
+            if (!ContainsLetters(pickup)) {
+                lblResult.Text = "Pickup location must include at least one letter.";
+                lblResult.ForeColor = Color.Red;
+                txtPickup.Focus();
+                return false;
+            }
+
+            if (string.IsNullOrWhiteSpace(dropoff)) {
+                lblResult.Text = "Drop-off location is required.";
+                lblResult.ForeColor = Color.Red;
+                txtDropoff.Focus();
+                return false;
+            }
+
+            if (!ContainsLetters(dropoff)) {
+                lblResult.Text = "Drop-off location must include at least one letter.";
+                lblResult.ForeColor = Color.Red;
+                txtDropoff.Focus();
+                return false;
+            }
+
+            if (lstAvailableDrivers.SelectedItem == null || !(lstAvailableDrivers.SelectedItem is Driver)) {
+                lblResult.Text = "Please select a valid driver from the list.";
+                lblResult.ForeColor = Color.Red;
+                return false;
+            }
+
+            lblResult.ForeColor = Color.Black;
+            return true;
         }
     }
 }
